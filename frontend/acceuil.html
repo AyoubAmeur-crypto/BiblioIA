@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblio IA – Votre Bibliothèque Intelligente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="acceuil.css">
+</head>
+
+
+<!-- HEADER -->
+<header>
+    <div class="main-header">
+        <div class="logo">Biblio<span> IA</span></div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Chercher un livre...">
+            <button onclick="document.getElementById('searchInput').value && api.searchBooks(document.getElementById('searchInput').value).then(books => displayBooks(books, 'booksList'))">Rechercher</button>
+        </div>
+        <div class="header-icons">
+  <a href="#" class="cart-link" id="cartBtn">Panier <span id="cartCount">0</span></a>
+  <a href="#" class="icon-link" id="profileBtn" style="display:none;">Mon Profil</a>
+  <a href="#" class="icon-link" id="loginBtn">Connexion</a>
+  <a href="#" class="icon-link" id="logoutBtn" style="display:none;">Déconnexion</a>
+</div>
+    </div>
+</header>
+
+<!-- NAVIGATION -->
+<nav>
+    <ul>
+        <li><a href="#" class="active" onclick="loadBooks(); return false;">Tous les livres</a></li>
+       
+    </ul>
+</nav>
+
+<!-- HERO SECTION -->
+<div class="hero-carousel">
+<div class="slide" style="background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2000');">
+        <div class="slide-content">
+            <h2>Découvrez des histoires captivantes</h2>
+            <p>Explorez une vaste collection de livres de tous genres et trouvez votre prochaine lecture préférée.</p>
+            <button class="btn-primary" onclick="document.querySelector('.books-grid') && document.querySelector('.books-grid').scrollIntoView({behavior: 'smooth'})">Parcourir les livres</button>
+        </div>
+    </div>
+</div>
+
+<!-- RECOMMENDATIONS (if logged in) -->
+<div id="recommendationsSection" style="display:none;">
+    <div class="container">
+        <div class="section-header">
+            <h2>Recommended for you</h2>
+            <a href="#" class="view-all">View all</a>
+        </div>
+        <div class="books-grid" id="recommendationsList"></div>
+    </div>
+</div>
+
+<div style="text-align: center; margin: 20px 0;">
+  <button onclick="refreshRecommendations()" class="btn-primary" id="refreshAllBtn" style="padding: 12px 25px;">
+    Refresh recommendations
+  </button>
+</div>
+
+<!-- ALL BOOKS -->
+<div class="container">
+    <div class="section-header">
+        <h2>Tous les livres</h2>
+        <a href="#" class="view-all">Voir tous</a>
+    </div>
+    <div class="books-grid" id="booksList">
+        <p>Chargement des livres...</p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-logo">Biblio<span> IA</span></div>
+    <p>Votre bibliothèque intelligente pour découvrir les meilleures lectures</p>
+    <p style="margin-top: 20px; font-size: 12px;">© 2026 Biblio IA. Tous droits réservés.</p>
+</footer>
+
+<!-- MODAL: Login/Register -->
+<div id="authModal" class="modal" >
+    <div class="modal-content" >
+        <button class="close">&times;</button>
+        <div id="authForm" class="authForm">
+            <h2>Connexion</h2>
+           <div class="" style="display: flex; flex-direction: column; align-items: center;  gap: 10px;">
+             <input type="email" id="email" placeholder="Email" style="width: 80%;" required>
+            <input type="password" id="password" placeholder="Mot de passe" style="width: 80%;" required>
+            <button id="loginFormBtn" style="width: 80%;" class="btn-primary">Se connecter</button>
+           </div>
+            <p style="text-align: center; margin-top: 15px;">Pas encore de compte? <a href="#" id="toggleRegister" style="color: var(--accent);">S'inscrire</a></p>
+        </div>
+
+        <div id="registerForm" style="display: flex; flex-direction: column; gap: 15px;">
+            <h2>Inscription</h2>
+            <div class="" style="display: flex; flex-direction: column; align-items: center;  gap: 10px;">
+                   <input type="text" id="username" style="width: 80%;" placeholder="Nom d'utilisateur" required>
+            <input type="email" id="regEmail" style="width: 80%;" placeholder="Email" required>
+            <input type="password" id="regPassword" style="width: 80%;" placeholder="Mot de passe" required>
+            <button id="registerFormBtn" style="width: 80%;" class="btn-primary">S'inscrire</button>
+            </div>
+         
+            <p style="text-align: center; margin-top: 15px;">Déjà inscrit? <a href="#" id="toggleLogin" style="color: var(--accent);">Se connecter</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Cart -->
+<div id="cartModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="close">&times;</button>
+        <h2 style="margin-bottom: 20px;">Your cart</h2>
+        <div id="cartItems" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+        <div class="cart-summary">
+            <h3 style="font-size: 18px; margin-bottom: 15px;">Total: <span id="totalPrice">0.00</span> $</h3>
+            <button id="checkoutBtn" class="btn-primary" style="width: 100%; padding: 12px;">Validate cart</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: You might like this (shown after add to cart) -->
+<div id="recommendationModal" class="modal">
+  <div class="modal-content recommendation-modal-content">
+    <button class="close" id="closeRecoModal">&times;</button>
+    <h2 class="reco-modal-title">Recommended for you</h2>
+    <div class="reco-modal-scroll" id="quickRecommendations"></div>
+    <div class="reco-modal-actions">
+      <button id="skipRecoBtn" class="btn-secondary">Skip</button>
+      <button id="nextToCartBtn" class="btn-primary">Next - View cart</button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
